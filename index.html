@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Zahlenraten 4-stellig + Admin</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(circle at top, #1d4ed8 0, #020617 55%, #020617 100%);
+      color: #e5e7eb;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 500px;
+      background: rgba(15, 23, 42, 0.96);
+      border-radius: 20px;
+      padding: 26px 26px 22px;
+      box-shadow:
+        0 28px 70px rgba(0, 0, 0, 0.85),
+        0 0 0 1px rgba(30, 64, 175, 0.55);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      backdrop-filter: blur(18px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.35), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(52, 211, 153, 0.22), transparent 55%);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .card-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .title {
+      font-size: 1.7rem;
+      font-weight: 700;
+      margin: 0 0 4px;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: linear-gradient(to right, #22c55e, #16a34a);
+      color: #022c22;
+      box-shadow: 0 0 0 1px rgba(22, 163, 74, 0.4);
+    }
+
+    .subtitle {
+      margin: 0 0 20px;
+      font-size: 0.92rem;
+      color: #9ca3af;
+    }
+
+    .range {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #6b7280;
+      margin-bottom: 12px;
+    }
+
+    .display {
+      margin-bottom: 20px;
+      padding: 13px 16px;
+      border-radius: 16px;
+      background: radial-gradient(circle at top left, #1d4ed8, #020617);
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .display-label {
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
+
+    .display-number {
+      font-variant-numeric: tabular-nums;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #e5e7eb;
+      min-width: 120px;
+      text-align: right;
+      letter-spacing: 0.2em;
+    }
+
+    .display-meta {
+      font-size: 0.78rem;
+      color: #9ca3af;
+      text-align: right;
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      flex: 1;
+    }
+
+    input[type="number"],
+    input[type="password"],
+    input[type="text"] {
+      width: 100%;
+      padding: 11px 14px 11px 32px;
+      border-radius: 12px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: rgba(15, 23, 42, 0.9);
+      color: #e5e7eb;
+      font-size: 0.95rem;
+      outline: none;
+      transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease,
+        transform 0.08s ease,
+        background 0.12s ease;
+    }
+
+    input::placeholder {
+      color: #6b7280;
+    }
+
+    input:focus {
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.5);
+      transform: translateY(-1px);
+      background: rgba(15, 23, 42, 1);
+    }
+
+    .input-prefix {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.8rem;
+      color: #6b7280;
+      pointer-events: none;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 0 18px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(135deg, #3b82f6, #22c55e);
+      color: #0b1120;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow:
+        0 10px 24px rgba(37, 99, 235, 0.45),
+        0 0 0 1px rgba(15, 23, 42, 0.8);
+      transition:
+        transform 0.09s ease,
+        box-shadow 0.09s ease,
+        filter 0.1s ease;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+      box-shadow:
+        0 14px 30px rgba(37, 99, 235, 0.6),
+        0 0 0 1px rgba(37, 99, 235, 0.9);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow:
+        0 7px 18px rgba(15, 23, 42, 0.85),
+        0 0 0 1px rgba(15, 23, 42, 1);
+      filter: brightness(0.97);
+    }
+
+    .feedback {
+      min-height: 22px;
+      font-size: 0.95rem;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.11em;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      background: rgba(15, 23, 42, 0.9);
+      color: #9ca3af;
+    }
+
+    .feedback-text {
+      font-weight: 500;
+    }
+
+    .feedback-high {
+      color: #f97316;
+    }
+
+    .feedback-low  {
+      color: #22c55e;
+    }
+
+    .feedback-correct {
+      color: #22c55e;
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: #6b7280;
+    }
+
+    .meta-row span strong {
+      color: #e5e7eb;
+    }
+
+    .animate-pop {
+      animation: pop 0.23s ease-out;
+    }
+
+    @keyframes pop {
+      0%   { transform: scale(0.96); opacity: 0.2; }
+      55%  { transform: scale(1.03); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .admin-toggle {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      font-size: 0.7rem;
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.95);
+      color: #9ca3af;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .admin-toggle span {
+      font-size: 0.8rem;
+    }
+
+    .admin-panel {
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px dashed rgba(55, 65, 81, 0.9);
+      font-size: 0.8rem;
+      color: #9ca3af;
+      display: none;
+    }
+
+    .admin-panel.visible {
+      display: block;
+    }
+
+    .admin-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .admin-label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .admin-info {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .admin-status {
+      margin-top: 6px;
+      font-size: 0.78rem;
+    }
+
+    .admin-status.ok {
+      color: #22c55e;
+    }
+
+    .admin-status.err {
+      color: #f97316;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="card-inner">
+      <button class="admin-toggle" type="button" onclick="toggleAdmin()">
+        <span>⚙</span> Admin
+      </button>
+
+      <div class="title">
+        Zahlenraten
+        <span class="badge">4-stellig</span>
+      </div>
+      <p class="subtitle">Rate die geheime 4-stellige Zahl – von 0000 bis 9999.</p>
+
+      <div class="range">Bereich: 0000 – 9999</div>
+
+      <div class="display" id="displayBox">
+        <div>
+          <div class="display-label">Letzter Tipp</div>
+          <div class="display-number" id="lastGuess">- - - -</div>
+        </div>
+        <div class="display-meta">
+          <div>Versuche: <span id="attempts">0</span></div>
+          <div id="statusLabel">Noch kein Versuch</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="input-wrapper">
+          <span class="input-prefix">#</span>
+          <input
+            type="number"
+            id="guess"
+            placeholder="Dein 4-stelliger Tipp"
+            min="0"
+            max="9999"
+            onkeydown="if(event.key === 'Enter') checkGuess()"
+          >
+        </div>
+        <button type="button" onclick="checkGuess()">
+          Raten <span>➜</span>
+        </button>
+      </div>
+
+      <div class="feedback" id="feedback">
+        <span class="pill">Hinweis</span>
+        <span class="feedback-text" id="feedbackText">Gib deinen ersten Tipp ab.</span>
+      </div>
+
+      <div class="meta-row">
+        <span>Bereich aktiv: <strong>0000 – 9999</strong></span>
+        <span id="hintMeta">Nutze Logik statt Glück.</span>
+      </div>
+
+      <div class="admin-panel" id="adminPanel">
+        <div class="admin-label">Admin-Bereich</div>
+        <div class="admin-info">
+          Einfaches Frontend-Passwort, nur für private Nutzung gedacht.
+        </div>
+
+        <div class="admin-row" id="adminLoginRow">
+          <div class="input-wrapper">
+            <span class="input-prefix">🔑</span>
+            <input
+              type="password"
+              id="adminPassword"
+              placeholder="Admin-Passwort"
+              onkeydown="if(event.key === 'Enter') adminLogin()"
+            >
+          </div>
+          <button type="button" onclick="adminLogin()">Login</button>
+        </div>
+
+        <div class="admin-row" id="adminSecretRow" style="display:none;">
+          <div class="input-wrapper">
+            <span class="input-prefix">#</span>
+            <input
+              type="number"
+              id="adminSecret"
+              placeholder="Neue geheime Zahl (0000–9999)"
+              min="0"
+              max="9999"
+              onkeydown="if(event.key === 'Enter') updateSecret()"
+            >
+          </div>
+          <button type="button" onclick="updateSecret()">Speichern</button>
+        </div>
+
+        <div class="admin-status" id="adminStatus"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ADMIN_PASSWORD = "Hacker21.10.200";
+    const DEFAULT_SECRET = 7418;
+
+    let secretNumber = DEFAULT_SECRET;
+    let attempts = 0;
+    let gameOver = false;
+    let adminUnlocked = false;
+
+    const guessInput   = document.getElementById('guess');
+    const attemptsEl   = document.getElementById('attempts');
+    const lastGuessEl  = document.getElementById('lastGuess');
+    const feedbackEl   = document.getElementById('feedbackText');
+    const statusLabel  = document.getElementById('statusLabel');
+    const hintMeta     = document.getElementById('hintMeta');
+    const displayBox   = document.getElementById('displayBox');
+    const feedbackWrap = document.getElementById('feedback');
+    const adminPanel   = document.getElementById('adminPanel');
+    const adminPasswordInput = document.getElementById('adminPassword');
+    const adminSecretInput   = document.getElementById('adminSecret');
+    const adminLoginRow      = document.getElementById('adminLoginRow');
+    const adminSecretRow     = document.getElementById('adminSecretRow');
+    const adminStatus        = document.getElementById('adminStatus');
+
+    function animate(element) {
+      element.classList.remove('animate-pop');
+      void element.offsetWidth;
+      element.classList.add('animate-pop');
+    }
+
+    function pad4(n) {
+      const num = Math.max(0, Math.min(9999, n | 0));
+      return num.toString().padStart(4, "0");
+    }
+
+    function loadSecret() {
+      const stored = localStorage.getItem('zr_secret_4');
+      if (stored !== null) {
+        const n = parseInt(stored, 10);
+        if (!isNaN(n) && n >= 0 && n <= 9999) {
+          secretNumber = n;
+        }
+      }
+    }
+
+    function saveSecret() {
+      localStorage.setItem('zr_secret_4', String(secretNumber));
+    }
+
+    function checkGuess() {
+      if (gameOver) return;
+
+      const raw = guessInput.value.trim();
+      const guess = parseInt(raw, 10);
+
+      if (raw === "" || isNaN(guess)) {
+        feedbackEl.textContent = 'Bitte gib eine gültige 4-stellige Zahl ein.';
+        feedbackEl.className = 'feedback-text';
+        animate(feedbackWrap);
+        return;
+      }
+
+      if (guess < 0 || guess > 9999) {
+        feedbackEl.textContent = 'Die Zahl muss zwischen 0000 und 9999 liegen.';
+        feedbackEl.className = 'feedback-text';
+        animate(feedbackWrap);
+        return;
+      }
+
+      attempts++;
+      attemptsEl.textContent = attempts;
+      lastGuessEl.textContent = pad4(guess);
+      animate(displayBox);
+
+      if (guess === secretNumber) {
+        feedbackEl.textContent = `Treffer! ${pad4(guess)} ist korrekt.`;
+        feedbackEl.className = 'feedback-text feedback-correct';
+        statusLabel.textContent = `Gelöst in ${attempts} Versuchen 🎉`;
+        hintMeta.textContent = 'Im Admin-Bereich kannst du eine neue geheime Zahl setzen.';
+        gameOver = true;
+      } else if (guess < secretNumber) {
+        feedbackEl.textContent = 'Höher! Deine Zahl ist zu klein.';
+        feedbackEl.className = 'feedback-text feedback-low';
+        statusLabel.textContent = 'Zu niedrig getippt';
+        hintMeta.textContent = 'Nutze z. B. binäre Suche (Mitte des Bereichs).';
+      } else {
+        feedbackEl.textContent = 'Kleiner! Deine Zahl ist zu groß.';
+        feedbackEl.className = 'feedback-text feedback-high';
+        statusLabel.textContent = 'Zu hoch getippt';
+        hintMeta.textContent = 'Grenze den oberen Bereich ein.';
+      }
+
+      animate(feedbackWrap);
+      guessInput.focus();
+      guessInput.select();
+    }
+
+    function resetGame() {
+      attempts = 0;
+      gameOver = false;
+      attemptsEl.textContent = '0';
+      lastGuessEl.textContent = '- - - -';
+      feedbackEl.textContent = 'Gib deinen ersten Tipp ab.';
+      feedbackEl.className = 'feedback-text';
+      statusLabel.textContent = 'Noch kein Versuch';
+      hintMeta.textContent = 'Nutze Logik statt Glück.';
+      guessInput.value = '';
+    }
+
+    function toggleAdmin() {
+      adminPanel.classList.toggle('visible');
+      if (adminPanel.classList.contains('visible')) {
+        if (!adminUnlocked) {
+          adminPasswordInput.focus();
+        } else {
+          adminSecretInput.focus();
+        }
+      }
+    }
+
+    function adminLogin() {
+      const pw = adminPasswordInput.value;
+      if (pw === ADMIN_PASSWORD) {
+        adminUnlocked = true;
+        adminLoginRow.style.display = 'none';
+        adminSecretRow.style.display = 'flex';
+        adminStatus.textContent = 'Admin freigeschaltet.';
+        adminStatus.className = 'admin-status ok';
+        adminSecretInput.value = pad4(secretNumber);
+        adminSecretInput.focus();
+      } else {
+        adminStatus.textContent = 'Falsches Passwort.';
+        adminStatus.className = 'admin-status err';
+        adminPasswordInput.select();
+      }
+    }
+
+    function updateSecret() {
+      const raw = adminSecretInput.value.trim();
+      const n = parseInt(raw, 10);
+      if (raw === "" || isNaN(n)) {
+        adminStatus.textContent = 'Bitte eine gültige 4-stellige Zahl eingeben.';
+        adminStatus.className = 'admin-status err';
+        return;
+      }
+      if (n < 0 || n > 9999) {
+        adminStatus.textContent = 'Zahl muss zwischen 0000 und 9999 liegen.';
+        adminStatus.className = 'admin-status err';
+        return;
+      }
+      secretNumber = n;
+      saveSecret();
+      adminStatus.textContent = `Neue geheime Zahl gesetzt: ${pad4(n)} (Spiel zurückgesetzt).`;
+      adminStatus.className = 'admin-status ok';
+      resetGame();
+      toggleAdmin(); // Panel nach Speichern schließen
+    }
+
+    loadSecret();
+  </script>
+</body>
+</html>
